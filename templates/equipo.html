@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Equipo {{ equipo.id_equipo }} - {{ equipo.lider_equipo }}{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Equipo {{ equipo.id_equipo }}</h1>
+    <p>Líder: {{ equipo.lider_equipo }}</p>
+    <!--<a href="{{ url_for('reporte_equipo', equipo_id=equipo.id_equipo) }}" style="color: #4CAF50;">Ver Reporte del Día</a>-->
+    
+</div>
+
+<div class="form-card">
+    <h2>Registrar Hosteo</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label>Equipo</label>
+            <input type="text" value="Equipo {{ equipo.id_equipo }}" disabled>
+        </div>
+        
+        <div class="form-group">
+            <label>Host *</label>
+            <select name="id_host" required>
+                <option value="">Selecciona un host</option>
+                {% for host in hosts %}
+                <option value="{{ host.id_host }}">{{ host.nombre_host }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Número de Personas *</label>
+            <input type="number" name="numero_personas" min="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Mesero Asignado *</label>
+            <select name="id_mesero" required>
+                <option value="">Selecciona un mesero</option>
+                {% for mesero in meseros %}
+                <option value="{{ mesero.id_mesero }}">{{ mesero.nombre_mesero }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit">Registrar Hosteo</button>
+    </form>
+</div>
+
+<div class="form-card">
+    <h2>Registros de Hoy</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Host</th>
+                <th>Personas</th>
+                <th>Mesero</th>
+                <th>Confirmado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.hora.strftime('%H:%M') }}</td>
+                <td>{{ registro.host.nombre_host }}</td>
+                <td>{{ registro.numero_personas }}</td>
+                <td>{{ registro.mesero.nombre_mesero }}</td>
+                <td>
+                    {# Cambiado: usar data-attribute y evitar submit accidental #}
+                    <button type="button" class="status-btn" data-registro-id="{{ registro.id_registro_hosteo }}" onclick="toggleConfirmacion(this)">
+                        <span class="{% if registro.confirmada %}confirmada{% else %}no-confirmada{% endif %}">
+                            {% if registro.confirmada %}✅{% else %}❌{% endif %}
+                        </span>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleConfirmacion(btn) {
+    // leer el id seguro desde el data-attribute
+    const registroId = btn.dataset.registroId;
+    const span = btn.querySelector('span');
+    const isConfirmada = span.classList.contains('confirmada');
+    const nuevaConfirmacion = !isConfirmada;
+    
+    fetch(`/api/confirmar/${encodeURIComponent(registroId)}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({confirmada: nuevaConfirmacion})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            span.textContent = data.confirmada ? '✅' : '❌';
+            span.className = data.confirmada ? 'confirmada' : 'no-confirmada';
+        }
+    })
+    .catch(err => {
+        console.error('Error confirmación:', err);
+    });
+}
+</script>
+{% endblock %}
