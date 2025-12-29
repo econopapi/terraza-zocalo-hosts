@@ -84,6 +84,25 @@
         }
         .confirmada { color: #4CAF50; }
         .no-confirmada { color: #f44336; }
+
+        /* Print styles */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { max-width: none; margin: 0; }
+            .header, .form-card, table { box-shadow: none !important; }
+            .header, .form-card { border: 1px solid #e0e0e0; }
+            .no-print { display: none !important; }
+
+            /* Ensure both tabs content is visible in reports */
+            .tab-content { display: block !important; }
+            .tabs { display: none !important; }
+
+            /* Better table pagination */
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>

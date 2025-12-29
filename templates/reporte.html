@@ -128,20 +128,32 @@
         color: #333;
         font-size: 18px;
     }
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .tab-content {
+            display: block !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="breadcrumb">
+<div class="breadcrumb no-print">
     <a href="{{ url_for('equipo_form', equipo_id=equipo.id_equipo) }}">← Volver a Equipo {{ equipo.id_equipo }}</a>
 </div>
 
 <div class="header">
     <h1>📊 Reporte del Día</h1>
     <p>Equipo {{ equipo.id_equipo }} - Líder: {{ equipo.lider_equipo }}</p>
+    <!-- Botón PDF -->
+    <div class="no-print" style="margin-top:10px;">
+        <button onclick="downloadPDF()">⬇️ Descargar PDF</button>
+    </div>
 </div>
 
-<div class="form-card">
+<div class="form-card no-print">
     <div class="fecha-selector">
         <label for="fecha-input">Selecciona una fecha:</label>
         <input type="date" id="fecha-input" value="{{ fecha_reporte }}">
@@ -178,7 +190,7 @@
 </div>
 
 <div class="form-card">
-    <div class="tabs">
+    <div class="tabs no-print">
         <button class="tab-btn active" onclick="switchTab(event, 'equipo')">Por Equipo</button>
         <button class="tab-btn" onclick="switchTab(event, 'host')">Desglose por Host</button>
     </div>
@@ -273,6 +285,26 @@ function irAReporteHost(host_id) {
     const fecha = document.getElementById('fecha-input').value;
     const equipo_id = {{ equipo.id_equipo }};
     window.location.href = `/reporte/${equipo_id}/host/${host_id}?fecha=${fecha}`;
+}
+
+function downloadPDF() {
+    // Save current active tab
+    const activeTab = document.querySelector('.tab-content.active');
+    const activeId = activeTab ? activeTab.id : null;
+
+    // Show all contents for print
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('active'));
+
+    // After print, restore the original state
+    const restore = () => {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const toActivate = document.getElementById(activeId || 'equipo');
+        if (toActivate) toActivate.classList.add('active');
+        window.removeEventListener('afterprint', restore);
+    };
+
+    window.addEventListener('afterprint', restore);
+    window.print();
 }
 </script>
 {% endblock %}

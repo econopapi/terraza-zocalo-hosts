@@ -69,20 +69,38 @@
         font-weight: bold;
         color: #333;
     }
+    .no-print {
+        display: none;
+    }
+    @media print {
+        .no-print {
+            display: block !important;
+        }
+        .fecha-selector {
+            display: none;
+        }
+        .breadcrumb {
+            display: none;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="breadcrumb">
+<div class="breadcrumb no-print">
     <a href="{{ url_for('reporte_equipo', equipo_id=equipo.id_equipo) }}?fecha={{ fecha_reporte }}">← Volver a Reporte</a>
 </div>
 
 <div class="header">
     <h1>📊 Reporte de {{ host.nombre_host }}</h1>
     <p>Equipo {{ equipo.id_equipo }} - {{ equipo.lider_equipo }}</p>
+    <!-- Botón PDF -->
+    <div class="no-print" style="margin-top:10px;">
+        <button onclick="window.print()">⬇️ Descargar PDF</button>
+    </div>
 </div>
 
-<div class="form-card">
+<div class="form-card no-print">
     <div class="fecha-selector">
         <label for="fecha-input">Selecciona una fecha:</label>
         <input type="date" id="fecha-input" value="{{ fecha_reporte }}">
