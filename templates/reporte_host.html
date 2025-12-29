@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de {{ host.nombre_host }} - Equipo {{ equipo.id_equipo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .breadcrumb {
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .breadcrumb a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    .fecha-selector {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .fecha-selector input {
+        max-width: 200px;
+    }
+    .fecha-selector button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .fecha-selector button:hover {
+        background: #45a049;
+    }
+    .fecha-selector .btn-hoy {
+        background: #2196F3;
+    }
+    .fecha-selector .btn-hoy:hover {
+        background: #0b7dda;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 5px solid #4CAF50;
+    }
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('reporte_equipo', equipo_id=equipo.id_equipo) }}?fecha={{ fecha_reporte }}">← Volver a Reporte</a>
+</div>
+
+<div class="header">
+    <h1>📊 Reporte de {{ host.nombre_host }}</h1>
+    <p>Equipo {{ equipo.id_equipo }} - {{ equipo.lider_equipo }}</p>
+</div>
+
+<div class="form-card">
+    <div class="fecha-selector">
+        <label for="fecha-input">Selecciona una fecha:</label>
+        <input type="date" id="fecha-input" value="{{ fecha_reporte }}">
+        <button onclick="filtrarPorFecha()">🔍 Filtrar</button>
+        <button onclick="irAHoy()" class="btn-hoy">📅 Ir a Hoy</button>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">👥 Total de Personas</div>
+        <div class="stat-value">{{ total_personas }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">✅ Personas Confirmadas</div>
+        <div class="stat-value">{{ personas_confirmadas }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">❌ Personas No Confirmadas</div>
+        <div class="stat-value">{{ total_personas - personas_confirmadas }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">🍽️ Total de Mesas</div>
+        <div class="stat-value">{{ total_hosteos }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">✅ Mesas Confirmadas</div>
+        <div class="stat-value">{{ confirmados }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">❌ Mesas No Confirmadas</div>
+        <div class="stat-value">{{ no_confirmados }}</div>
+    </div>
+</div>
+
+<div class="form-card">
+    <h2>Detalles de Hosteos</h2>
+    {% if registros %}
+    <table>
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Personas</th>
+                <th>Mesero</th>
+                <th>Confirmado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.hora.strftime('%H:%M') }}</td>
+                <td>{{ registro.numero_personas }}</td>
+                <!-- Fallback si el mesero no existe -->
+                <td>{{ registro.mesero.nombre_mesero if registro.mesero else 'N/D' }}</td>
+                <td>
+                    <span class="{% if registro.confirmada %}confirmada{% else %}no-confirmada{% endif %}">
+                        {% if registro.confirmada %}✅{% else %}❌{% endif %}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 20px;">No hay registros para esta fecha</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filtrarPorFecha() {
+    const fecha = document.getElementById('fecha-input').value;
+    const equipo_id = {{ equipo.id_equipo }};
+    const host_id = {{ host.id_host }};
+    window.location.href = `/reporte/${equipo_id}/host/${host_id}?fecha=${fecha}`;
+}
+
+function irAHoy() {
+    const today = new Date().toISOString().split('T')[0];
+    const equipo_id = {{ equipo.id_equipo }};
+    const host_id = {{ host.id_host }};
+    window.location.href = `/reporte/${equipo_id}/host/${host_id}?fecha=${today}`;
+}
+</script>
+{% endblock %}

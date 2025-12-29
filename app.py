@@ -70,13 +70,21 @@ def confirmar_registro(registro_id):
 @app.route('/reporte/<int:equipo_id>')
 def reporte_equipo(equipo_id):
     equipo = Equipo.query.get_or_404(equipo_id)
-    hoy = get_cdmx_time().date()
+    fecha_param = request.args.get('fecha')
     
-    # Estadísticas del día
+    if fecha_param:
+        try:
+            fecha_reporte = datetime.strptime(fecha_param, '%Y-%m-%d').date()
+        except:
+            fecha_reporte = get_cdmx_time().date()
+    else:
+        fecha_reporte = get_cdmx_time().date()
+    
+    # Registros del día seleccionado con ordenamiento
     registros = RegistroDiarioHosteo.query.join(Host).filter(
         Host.id_equipo == equipo_id,
-        RegistroDiarioHosteo.fecha == hoy
-    ).all()
+        RegistroDiarioHosteo.fecha == fecha_reporte
+    ).order_by(RegistroDiarioHosteo.hora.desc()).all()
     
     total_hosteos = len(registros)
     confirmados = sum(1 for r in registros if r.confirmada)
@@ -87,12 +95,15 @@ def reporte_equipo(equipo_id):
     # Ranking de hosts
     ranking = db.session.query(
         Host.nombre_host,
+        Host.id_host,
         func.count(RegistroDiarioHosteo.id_registro_hosteo).label('total'),
         func.sum(RegistroDiarioHosteo.numero_personas).label('personas')
     ).join(RegistroDiarioHosteo).filter(
         Host.id_equipo == equipo_id,
-        RegistroDiarioHosteo.fecha == hoy
-    ).group_by(Host.nombre_host).all()
+        RegistroDiarioHosteo.fecha == fecha_reporte
+    ).group_by(Host.nombre_host, Host.id_host).order_by(func.count(RegistroDiarioHosteo.id_registro_hosteo).desc()).all()
+    
+    print(f"DEBUG - Equipo: {equipo.id_equipo}, Fecha: {fecha_reporte}, Total hosteos: {total_hosteos}")
     
     return render_template('reporte.html',
                          equipo=equipo,
@@ -102,7 +113,47 @@ def reporte_equipo(equipo_id):
                          total_personas=total_personas,
                          personas_confirmadas=personas_confirmadas,
                          ranking=ranking,
-                         registros=registros)
+                         registros=registros,
+                         fecha_reporte=fecha_reporte.isoformat())
+
+@app.route('/reporte/<int:equipo_id>/host/<int:host_id>')
+def reporte_host(equipo_id, host_id):
+    equipo = Equipo.query.get_or_404(equipo_id)
+    host = Host.query.get_or_404(host_id)
+    fecha_param = request.args.get('fecha')
+    
+    if fecha_param:
+        try:
+            fecha_reporte = datetime.strptime(fecha_param, '%Y-%m-%d').date()
+        except:
+            fecha_reporte = get_cdmx_time().date()
+    else:
+        fecha_reporte = get_cdmx_time().date()
+    
+    # Registros del host específico en la fecha seleccionada
+    registros = RegistroDiarioHosteo.query.filter(
+        RegistroDiarioHosteo.id_host == host_id,
+        RegistroDiarioHosteo.fecha == fecha_reporte
+    ).order_by(RegistroDiarioHosteo.hora.desc()).all()
+    
+    total_hosteos = len(registros)
+    confirmados = sum(1 for r in registros if r.confirmada)
+    no_confirmados = total_hosteos - confirmados
+    total_personas = sum(r.numero_personas for r in registros)
+    personas_confirmadas = sum(r.numero_personas for r in registros if r.confirmada)
+    
+    print(f"DEBUG - Host: {host.nombre_host}, Fecha: {fecha_reporte}, Total: {total_hosteos}")
+    
+    return render_template('reporte_host.html',
+                         equipo=equipo,
+                         host=host,
+                         total_hosteos=total_hosteos,
+                         confirmados=confirmados,
+                         no_confirmados=no_confirmados,
+                         total_personas=total_personas,
+                         personas_confirmadas=personas_confirmadas,
+                         registros=registros,
+                         fecha_reporte=fecha_reporte.isoformat())
 
 # Script para inicializar DB con datos de prueba
 @app.cli.command()

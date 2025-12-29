@@ -63,9 +63,11 @@
             {% for registro in registros %}
             <tr>
                 <td>{{ registro.hora.strftime('%H:%M') }}</td>
-                <td>{{ registro.host.nombre_host }}</td>
+                <!-- Fallback si el host no existe -->
+                <td>{{ registro.host.nombre_host if registro.host else 'N/D' }}</td>
                 <td>{{ registro.numero_personas }}</td>
-                <td>{{ registro.mesero.nombre_mesero }}</td>
+                <!-- Fallback si el mesero no existe -->
+                <td>{{ registro.mesero.nombre_mesero if registro.mesero else 'N/D' }}</td>
                 <td>
                     {# Cambiado: usar data-attribute y evitar submit accidental #}
                     <button type="button" class="status-btn" data-registro-id="{{ registro.id_registro_hosteo }}" onclick="toggleConfirmacion(this)">
