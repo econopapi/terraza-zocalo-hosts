@@ -49,37 +49,39 @@
 
 <div class="form-card">
     <h2>Registros de Hoy</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Hora</th>
-                <th>Host</th>
-                <th>Personas</th>
-                <th>Mesero</th>
-                <th>Confirmado</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for registro in registros %}
-            <tr>
-                <td>{{ registro.hora.strftime('%H:%M') }}</td>
-                <!-- Fallback si el host no existe -->
-                <td>{{ registro.host.nombre_host if registro.host else 'N/D' }}</td>
-                <td>{{ registro.numero_personas }}</td>
-                <!-- Fallback si el mesero no existe -->
-                <td>{{ registro.mesero.nombre_mesero if registro.mesero else 'N/D' }}</td>
-                <td>
-                    {# Cambiado: usar data-attribute y evitar submit accidental #}
-                    <button type="button" class="status-btn" data-registro-id="{{ registro.id_registro_hosteo }}" onclick="toggleConfirmacion(this)">
-                        <span class="{% if registro.confirmada %}confirmada{% else %}no-confirmada{% endif %}">
-                            {% if registro.confirmada %}✅{% else %}❌{% endif %}
-                        </span>
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Host</th>
+                    <th>Personas</th>
+                    <th>Mesero</th>
+                    <th>Confirmado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                <tr>
+                    <td>{{ registro.hora.strftime('%H:%M') }}</td>
+                    <!-- Fallback si el host no existe -->
+                    <td>{{ registro.host.nombre_host if registro.host else 'N/D' }}</td>
+                    <td>{{ registro.numero_personas }}</td>
+                    <!-- Fallback si el mesero no existe -->
+                    <td>{{ registro.mesero.nombre_mesero if registro.mesero else 'N/D' }}</td>
+                    <td>
+                        {# Cambiado: usar data-attribute y evitar submit accidental #}
+                        <button type="button" class="status-btn" data-registro-id="{{ registro.id_registro_hosteo }}" onclick="toggleConfirmacion(this)">
+                            <span class="{% if registro.confirmada %}confirmada{% else %}no-confirmada{% endif %}">
+                                {% if registro.confirmada %}✅{% else %}❌{% endif %}
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
 
