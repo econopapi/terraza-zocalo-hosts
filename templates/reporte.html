@@ -256,7 +256,8 @@
         {% if ranking %}
         <div style="display: flex; flex-direction: column; gap: 10px;">
             {% for row in ranking %}
-            <div class="host-row" onclick="irAReporteHost({{ row[1] }})">
+            <!-- row: [nombre_host, id_host, mesas, personas, host_equipo_id] -->
+            <div class="host-row" onclick="irAReporteHost({{ row[1] }}, {{ row[4] }})">
                 <div class="host-name">{{ row[0] }}</div>
                 <div class="host-stats">
                     <div class="host-stat">
@@ -301,10 +302,9 @@ function irAHoy() {
     window.location.href = `/reporte/${equipo_id}?fecha=${today}`;
 }
 
-function irAReporteHost(host_id) {
+function irAReporteHost(host_id, host_equipo_id) {
     const fecha = document.getElementById('fecha-input').value;
-    const equipo_id = {{ equipo.id_equipo }};
-    window.location.href = `/reporte/${equipo_id}/host/${host_id}?fecha=${fecha}`;
+    window.location.href = `/reporte/${host_equipo_id}/host/${host_id}?fecha=${fecha}`;
 }
 
 function downloadPDF() {

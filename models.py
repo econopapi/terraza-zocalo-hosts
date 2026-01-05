@@ -10,6 +10,7 @@ class Equipo(db.Model):
     
     id_equipo = db.Column(db.Integer, primary_key=True)
     lider_equipo = db.Column(db.String(100), nullable=False)
+    clave_lider = db.Column(db.String(120), unique=True, nullable=True)
     hosts = db.relationship('Host', backref='equipo', lazy=True)
     cortes = db.relationship('CorteDiarioHosteo', backref='equipo', lazy=True)
 
@@ -19,6 +20,7 @@ class Host(db.Model):
     id_host = db.Column(db.Integer, primary_key=True)
     id_equipo = db.Column(db.Integer, db.ForeignKey('equipos.id_equipo'), nullable=False)
     nombre_host = db.Column(db.String(100), nullable=False)
+    clave_host = db.Column(db.String(120), unique=True, nullable=True)
     
     registros = db.relationship('RegistroDiarioHosteo', backref='host', lazy=True)
 
@@ -27,6 +29,7 @@ class Mesero(db.Model):
     
     id_mesero = db.Column(db.Integer, primary_key=True)
     nombre_mesero = db.Column(db.String(100), nullable=False)
+    clave_mesero = db.Column(db.String(120), unique=True, nullable=True)
     
     registros = db.relationship('RegistroDiarioHosteo', backref='mesero', lazy=True)
 
