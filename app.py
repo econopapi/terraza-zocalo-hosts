@@ -12,10 +12,6 @@ db.init_app(app)
 def get_cdmx_time():
     return datetime.now(ZoneInfo("America/Mexico_City"))
 
-# @app.route('/')
-# def index():
-#     equipos = Equipo.query.all()
-#     return render_template('index.html', equipos=equipos)
 
 @app.route('/')
 def index():
@@ -29,7 +25,7 @@ def index():
     })
     return response_payload
     
-@app.route('/equipo-<int:equipo_id>', methods=['GET', 'POST'])
+@app.route('/equipo/<int:equipo_id>', methods=['GET', 'POST'])
 def equipo_form(equipo_id):
     equipo = Equipo.query.get_or_404(equipo_id)
     hosts = Host.query.filter_by(id_equipo=equipo_id).all()

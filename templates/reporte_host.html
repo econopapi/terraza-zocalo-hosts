@@ -20,6 +20,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
     }
     .fecha-selector input {
         max-width: 200px;
@@ -55,14 +56,21 @@
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border-left: 5px solid #4CAF50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
     }
     .stat-label {
         font-size: 14px;
         color: #666;
-        margin-bottom: 10px;
+        margin-bottom: 0;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     .stat-value {
         font-size: 32px;
@@ -71,6 +79,17 @@
     }
     .no-print {
         display: none;
+    }
+    @media (max-width: 768px) {
+        .fecha-selector {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .fecha-selector input,
+        .fecha-selector button {
+            width: 100%;
+        }
     }
     @media print {
         .no-print {
